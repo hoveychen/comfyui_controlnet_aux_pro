@@ -73,7 +73,7 @@ MODEL_PARAMS = {
     'depth_zoe': {},
     'depth_leres': {'boost': False},
     'depth_leres++': {'boost': True},
-    'mediapipe_face': {},
+    'mediapipe_face': {'include_oval': True, 'include_eyebrows': True, 'include_eyes': True, 'include_pupils': True, 'include_iris': False, 'include_lips': True},
     'tile': {},
 }
 

@@ -28,24 +28,6 @@ if mp:
     mouth_draw = DrawingSpec(color=(10, 180, 10), thickness=f_thick, circle_radius=f_rad)
     head_draw = DrawingSpec(color=(10, 200, 10), thickness=f_thick, circle_radius=f_rad)
 
-    # mp_face_mesh.FACEMESH_CONTOURS has all the items we care about.
-    face_connection_spec = {}
-    for edge in mp_face_mesh.FACEMESH_FACE_OVAL:
-        face_connection_spec[edge] = head_draw
-    for edge in mp_face_mesh.FACEMESH_LEFT_EYE:
-        face_connection_spec[edge] = left_eye_draw
-    for edge in mp_face_mesh.FACEMESH_LEFT_EYEBROW:
-        face_connection_spec[edge] = left_eyebrow_draw
-    # for edge in mp_face_mesh.FACEMESH_LEFT_IRIS:
-    #    face_connection_spec[edge] = left_iris_draw
-    for edge in mp_face_mesh.FACEMESH_RIGHT_EYE:
-        face_connection_spec[edge] = right_eye_draw
-    for edge in mp_face_mesh.FACEMESH_RIGHT_EYEBROW:
-        face_connection_spec[edge] = right_eyebrow_draw
-    # for edge in mp_face_mesh.FACEMESH_RIGHT_IRIS:
-    #    face_connection_spec[edge] = right_iris_draw
-    for edge in mp_face_mesh.FACEMESH_LIPS:
-        face_connection_spec[edge] = mouth_draw
     iris_landmark_spec = {468: right_iris_draw, 473: left_iris_draw}
 
 
@@ -84,11 +66,44 @@ def reverse_channels(image):
     # im[:,:,::[2,1,0]] would also work but makes a copy of the data.
     return image[:, :, ::-1]
 
+def generate_face_connection_spec(include_oval, include_eyebrows, include_eyes, include_iris, include_lips):
+    # mp_face_mesh.FACEMESH_CONTOURS has all the items we care about.
+    face_connection_spec = {}
+    if include_oval:
+        for edge in mp_face_mesh.FACEMESH_FACE_OVAL:
+            face_connection_spec[edge] = head_draw
+    if include_eyebrows:
+        for edge in mp_face_mesh.FACEMESH_LEFT_EYEBROW:
+            face_connection_spec[edge] = left_eyebrow_draw
+        for edge in mp_face_mesh.FACEMESH_RIGHT_EYEBROW:
+            face_connection_spec[edge] = right_eyebrow_draw
+    if include_eyes:
+        for edge in mp_face_mesh.FACEMESH_LEFT_EYE:
+            face_connection_spec[edge] = left_eye_draw
+        for edge in mp_face_mesh.FACEMESH_RIGHT_EYE:
+            face_connection_spec[edge] = right_eye_draw
+    if include_iris:
+        for edge in mp_face_mesh.FACEMESH_LEFT_IRIS:
+           face_connection_spec[edge] = left_iris_draw
+        for edge in mp_face_mesh.FACEMESH_RIGHT_IRIS:
+           face_connection_spec[edge] = right_iris_draw
+    if include_lips:
+        for edge in mp_face_mesh.FACEMESH_LIPS:
+            face_connection_spec[edge] = mouth_draw
+    return face_connection_spec
+    
+
 
 def generate_annotation(
         img_rgb,
         max_faces: int,
-        min_confidence: float
+        min_confidence: float,
+        include_oval: bool,
+        include_eyebrows: bool,
+        include_eyes: bool,
+        include_pupils: bool,
+        include_iris: bool,
+        include_lips: bool,
 ):
     """
     Find up to 'max_faces' inside the provided input image.
@@ -139,6 +154,10 @@ def generate_annotation(
         # Annotations are drawn in BGR for some reason, but we don't need to flip a zero-filled image at the start.
         empty = numpy.zeros_like(img_rgb)
 
+        face_connection_spec = generate_face_connection_spec(
+            include_oval, include_eyebrows, include_eyes, include_iris, include_lips
+        )
+
         # Draw detected faces:
         for face_landmarks in filtered_landmarks:
             mp_drawing.draw_landmarks(
@@ -148,7 +167,8 @@ def generate_annotation(
                 landmark_drawing_spec=None,
                 connection_drawing_spec=face_connection_spec
             )
-            draw_pupils(empty, face_landmarks, iris_landmark_spec, 2)
+            if include_pupils:
+                draw_pupils(empty, face_landmarks, iris_landmark_spec, 2)
 
         # Flip BGR back to RGB.
         empty = reverse_channels(empty).copy()

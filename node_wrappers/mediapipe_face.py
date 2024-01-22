@@ -36,12 +36,12 @@ class Media_Pipe_Face_Mesh_Preprocessor:
         return create_node_input_types(
             max_faces=("INT", {"default": 10, "min": 1, "max": 50, "step": 1}), #Which image has more than 50 detectable faces?
             min_confidence=("FLOAT", {"default": 0.5, "min": 0.01, "max": 1.0, "step": 0.01}),
-            include_oval=("BOOL", {"default": True}),
-            include_eyebrows=("BOOL", {"default": True}),
-            include_eyes=("BOOL", {"default": True}),
-            include_pupils=("BOOL", {"default": True}),
-            include_iris=("BOOL", {"default": False}),
-            include_lips=("BOOL", {"default": True}),
+            include_oval=("BOOLEAN", {"default": True}),
+            include_eyebrows=("BOOLEAN", {"default": True}),
+            include_eyes=("BOOLEAN", {"default": True}),
+            include_pupils=("BOOLEAN", {"default": True}),
+            include_iris=("BOOLEAN", {"default": False}),
+            include_lips=("BOOLEAN", {"default": True}),
         )
         
     RETURN_TYPES = ("IMAGE",)

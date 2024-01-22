@@ -36,6 +36,12 @@ class Media_Pipe_Face_Mesh_Preprocessor:
         return create_node_input_types(
             max_faces=("INT", {"default": 10, "min": 1, "max": 50, "step": 1}), #Which image has more than 50 detectable faces?
             min_confidence=("FLOAT", {"default": 0.5, "min": 0.01, "max": 1.0, "step": 0.01})
+            include_oval=("BOOL", {"default": True}),
+            include_eyebrows=("BOOL", {"default": True}),
+            include_eyes=("BOOL", {"default": True}),
+            include_pupils=("BOOL", {"default": True}),
+            include_iris=("BOOL", {"default": False}),
+            include_lips=("BOOL", {"default": True}),
         )
         
     RETURN_TYPES = ("IMAGE",)
@@ -43,11 +49,14 @@ class Media_Pipe_Face_Mesh_Preprocessor:
 
     CATEGORY = "ControlNet Preprocessors/Faces and Poses Estimators"
 
-    def detect(self, image, max_faces, min_confidence, resolution=512):
+    def detect(self, image, max_faces, min_confidence, include_oval, include_eyebrows, include_eyes, include_pupils, include_iris, include_lips, resolution=512):
         #Ref: https://github.com/Fannovel16/comfy_controlnet_preprocessors/issues/70#issuecomment-1677967369
         install_deps()
         from controlnet_aux.mediapipe_face import MediapipeFaceDetector
-        return (common_annotator_call(MediapipeFaceDetector(), image, max_faces=max_faces, min_confidence=min_confidence, resolution=resolution), )
+        return (common_annotator_call(MediapipeFaceDetector(), image, max_faces=max_faces, min_confidence=min_confidence, 
+                                      include_oval=include_oval, include_eyebrows=include_eyebrows, include_eyes=include_eyes,
+                                      include_pupils=include_pupils, include_iris=include_iris, include_lips=include_lips,
+                                      resolution=resolution), )
 
 NODE_CLASS_MAPPINGS = {
     "MediaPipe-FaceMeshPreprocessor": Media_Pipe_Face_Mesh_Preprocessor

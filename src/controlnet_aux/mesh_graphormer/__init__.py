@@ -1,4 +1,5 @@
 import cv2
+import torch
 import numpy as np
 from PIL import Image
 from controlnet_aux.util import resize_image_with_pad, common_input_validate, HWC3, custom_hf_download, MESH_GRAPHORMER_MODEL_NAME
@@ -13,6 +14,7 @@ class MeshGraphormerDetector:
         args.resume_checkpoint = custom_hf_download(pretrained_model_or_path, filename)
         args.hrnet_checkpoint = custom_hf_download(pretrained_model_or_path, hrnet_filename)
         args.seed = seed
+        args.device = "cuda" if torch.cuda.is_available() else "cpu"
         pipeline = MeshGraphormerMediapipe(args)
         return cls(pipeline)
     
